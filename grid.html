@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sticky Columns Table</title>
+
+  <style>
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: auto;
+      margin: 0;
+      padding: 0;
+    }
+
+    .table__container {
+      width: 70%;
+      max-height: 600px;
+      overflow-y: auto;
+      border-bottom: 1px solid #ccc;
+    }
+
+    /* Each "row" is actually a grid with a fixed template to accommodate all columns */
+    .table__row {
+      display: grid;
+      /* 
+         1st col: 250px (carrier name)
+         Next 301 cols: 100px each
+         Last col: 60px (sticky right)
+      */
+      grid-template-columns: 250px repeat(301, 100px) 60px;
+      width: max-content; /* Allows scrolling horizontally if needed */
+    }
+
+    .table__cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 10px;
+      border-top: 1px solid #ccc;
+      border-left: 1px solid #ccc;
+      box-sizing: border-box;
+      white-space: nowrap; /* Helps keep cells from wrapping in narrow columns */
+    }
+
+    /* Remove top border for the second row (which is the first data row) */
+    .table__row:nth-child(2) > .table__cell {
+      border-top: none;
+    }
+
+    /* Remove bottom border from the last row if desired (optional) */
+    .table__row:last-child > .table__cell {
+      border-bottom: none;
+    }
+
+    /* Remove left border for the 2nd cell in each row (just style preference) */
+    .table__row > .table__cell:nth-child(2) {
+      border-left: none;
+    }
+
+    /* Sticky left-most column */
+    .sticky-left-col {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      background-color: #add8e6 !important;
+      border-left: 1px solid #ccc;
+      border-right: 1px solid #ccc;
+    }
+
+    /* Sticky right-most column */
+    .sticky-right-col {
+      position: sticky;
+      right: 0;
+      z-index: 3;
+      background-color: #f08080 !important;
+      border-right: 1px solid #ccc;
+    }
+
+    /* Sticky left for data rows */
+    .sticky-left {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      background-color: #fff;
+      border-left: 1px solid #ccc;
+      border-right: 1px solid #ccc;
+    }
+
+    /* Sticky right for data rows */
+    .sticky-right {
+      position: sticky;
+      right: 0;
+      z-index: 2;
+      background-color: #fff;
+      border-right: 1px solid #ccc;
+    }
+
+    /* Sticky header (the very top row) */
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+    }
+
+    /* Header columns styling */
+    .col-header {
+      background-color: #fff;
+      border-bottom: 1px solid #ccc;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="table__container">
+    <!-- Header row -->
+    <div class="table__row sticky-header" id="columnRow">
+      <div class="table__cell sticky-left-col">Row name</div>
+      <div class="table__cell col-header" id="col">Header 0</div>
+      <div class="table__cell sticky-right-col">...</div>
+    </div>
+
+    <!-- A single "prototype" data row -->
+    <div class="table__row" id="dataRow">
+      <div class="table__cell sticky-left">Row name</div>
+      <div class="table__cell data_row" id="dataCol">
+        <input type="checkbox" />
+      </div>
+      <div class="table__cell sticky-right">Opt</div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Clones the header cell with id="col" colCount times
+     * and inserts them immediately after the original #col cell.
+     */
+    function addColumn(colCount) {
+      for (let i = colCount - 1; i >= 0; i--) {
+        const originalCol = document.getElementById('col');
+        const newCol = originalCol.cloneNode(false); // false = don't clone child nodes
+        newCol.id = `col_${i}`;
+        newCol.textContent = `Header ${i}`;
+        originalCol.insertAdjacentElement('afterend', newCol);
+      }
+    }
+
+    /**
+     * Clones the data cell with id="dataCol" colCount times
+     * in the "prototype" data row, then clones that row rowCount times.
+     */
+    function addRow(rowCount, colCount) {
+      // First, add columns to the prototype data row
+      for (let i = 0; i < colCount; i++) {
+        const originalDataCol = document.getElementById('dataCol');
+        const newDataCol = originalDataCol.cloneNode(true); 
+        // If you need a unique ID or text per cell, handle it here:
+        // newDataCol.textContent = `data_${i}`;
+        // newDataCol.id = `data_col_${i}`;
+        originalDataCol.insertAdjacentElement('afterend', newDataCol);
+      }
+
+      // Then, clone the entire row rowCount times
+      for (let i = 0; i < rowCount; i++) {
+        const originalRow = document.getElementById('dataRow');
+        const newRow = originalRow.cloneNode(true);
+        newRow.id = `dataRow_${i}`;
+        originalRow.insertAdjacentElement('afterend', newRow);
+      }
+    }
+
+    // Adjust these as needed
+    const totalRows = 200;
+    const totalCols = 300;
+
+    // Generate columns and rows
+    addColumn(totalCols);
+    addRow(totalRows, totalCols);
+  </script>
+</body>
+</html>
